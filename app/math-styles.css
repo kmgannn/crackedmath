@@ -1,0 +1,24 @@
+/* Math formatting styles */
+.math-solution {
+  font-family: "Times New Roman", Times, serif;
+  line-height: 1.5;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 0.5rem;
+}
+
+.dark .math-solution {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.math-solution sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.math-solution sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 0;
+}

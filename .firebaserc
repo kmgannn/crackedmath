@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "production": "cracked-math",
+    "default": "cracked-math"
+  },
+  "targets": {},
+  "etags": {}
+}
