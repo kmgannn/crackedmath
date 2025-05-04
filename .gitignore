@@ -29,3 +29,6 @@ next-env.d.ts
 # firebase
 .firebase/
 firebase.json
+
+#google-credentials
+google-credentials.json
