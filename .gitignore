@@ -32,3 +32,5 @@ firebase.json
 
 #google-credentials
 google-credentials.json
+
+/myownmodules/
