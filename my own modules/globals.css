@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@config "../../tailwind.config.js";
+
+:root {
+  --background: 0 0% 95%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 9.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .app-container {
+    @apply w-screen h-screen transition-colors duration-200 overflow-auto;
+  }
+
+  .app-container-dark {
+    @apply bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900;
+  }
+
+  .app-container-light {
+    @apply bg-[#f5f7fa];
+  }
+
+  .auth-container {
+    @apply w-full max-w-xl backdrop-blur-sm rounded-2xl p-8 space-y-6;
+  }
+
+  .auth-container-dark {
+    @apply bg-gray-800/50 shadow-xl;
+  }
+
+  .auth-container-light {
+    @apply bg-[#fafafa]/80 shadow-lg;
+  }
+
+  .theme-toggle {
+    @apply p-2 rounded-full;
+  }
+
+  .theme-toggle-dark {
+    @apply bg-gray-700 text-yellow-400 hover:bg-gray-600;
+  }
+
+  .theme-toggle-light {
+    @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+  }
+
+  .app-title {
+    @apply font-bold flex items-center gap-2;
+  }
+
+  .app-title-auth {
+    @apply text-3xl text-center;
+  }
+
+  .app-title-main {
+    @apply text-4xl;
+  }
+
+  .app-title-dark {
+    @apply text-indigo-400;
+  }
+
+  .app-title-light {
+    @apply text-indigo-700;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 text-base rounded-xl focus:outline-none focus:ring-2;
+  }
+
+  .input-field-dark {
+    @apply bg-gray-700/50 border-2 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500;
+  }
+
+  .input-field-light {
+    @apply bg-white/50 border-2 border-indigo-300/50 focus:ring-indigo-500;
+  }
+
+  .submit-button {
+    @apply w-full text-white text-lg py-3 rounded-xl shadow-md flex items-center justify-center gap-2;
+  }
+
+  .submit-button-dark {
+    @apply bg-indigo-600/80 hover:bg-indigo-700/80;
+  }
+
+  .submit-button-light {
+    @apply bg-indigo-600/90 hover:bg-indigo-700/90;
+  }
+
+  .file-input {
+    @apply w-full px-4 py-3 text-sm border border-dashed rounded-xl cursor-pointer;
+  }
+
+  .file-input-dark {
+    @apply bg-gray-700/30 border-gray-600 text-gray-300 hover:bg-gray-700/50;
+  }
+
+  .file-input-light {
+    @apply bg-white/30 border-gray-400 hover:bg-white/50;
+  }
+
+  .tab-container {
+    @apply flex mb-6 rounded-lg p-1 shadow-sm backdrop-blur-sm;
+  }
+
+  .tab-container-dark {
+    @apply bg-gray-800/50;
+  }
+
+  .tab-container-light {
+    @apply bg-white/60;
+  }
+
+  .tab-button {
+    @apply flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2;
+  }
+
+  .tab-button-active-dark {
+    @apply bg-gray-700 text-indigo-400;
+  }
+
+  .tab-button-active-light {
+    @apply bg-indigo-100/80 text-indigo-900;
+  }
+
+  .tab-button-inactive-dark {
+    @apply text-gray-300 hover:bg-gray-700/50;
+  }
+
+  .tab-button-inactive-light {
+    @apply text-gray-600 hover:bg-gray-50/80;
+  }
+
+  .content-container {
+    @apply shadow-xl rounded-2xl p-8 mb-8 backdrop-blur-sm;
+  }
+
+  .content-container-dark {
+    @apply bg-gray-800/50;
+  }
+
+  .content-container-light {
+    @apply bg-[#fafafa]/80;
+  }
+
+  .history-item {
+    @apply rounded-xl p-4 break-words;
+  }
+
+  .history-item-dark {
+    @apply bg-gray-700/50 text-gray-200;
+  }
+
+  .history-item-light {
+    @apply bg-[#f8f9fa]/70 text-indigo-800;
+  }
+}
