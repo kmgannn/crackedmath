@@ -1,6 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  FacebookAuthProvider,
+  signInWithPopup,
+  signInWithRedirect
+} from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';
 //import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
@@ -23,8 +29,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Initialize providers
+export const googleProvider = new GoogleAuthProvider();
+export const facebookProvider = new FacebookAuthProvider();
+
+// Authentication functions
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return { success: true, user: result.user };
+  } catch (error) {
+    console.error("Error signing in with Google:", error);
+    return { success: false, error };
+  }
+};
+
+export const signInWithFacebook = async () => {
+  try {
+    const result = await signInWithPopup(auth, facebookProvider);
+    return { success: true, user: result.user };
+  } catch (error) {
+    console.error("Error signing in with Facebook:", error);
+    return { success: false, error };
+  }
+};
 
 let analytics; // Declare with the imported type and allow undefined
 if (typeof window !== 'undefined') {

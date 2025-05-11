@@ -50,10 +50,7 @@
 }
 
 @layer base {
-  * {
-    @apply border border-border;
-  }
-  body {
+    body {
     @apply bg-background text-foreground;
   }
 }

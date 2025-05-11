@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/contexts/theme-context"
-import Script from "next/script";
+import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,13 +21,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* MathJax CDN */}
         <Script
           id="mathjax-script"
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"
           strategy="beforeInteractive"
         />
+        {/* MathJax Configuration */}
+        <Script id="mathjax-config" strategy="beforeInteractive">
+          {`
+            window.MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,}}
+            };
+          `}
+        </Script>
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <main>{children}</main>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

@@ -23,16 +23,18 @@ export async function solveMathProblem(problem: string): Promise<string> {
 
   try {
     const prompt = `
-      You are a helpful math tutor. Please solve the following math problem step by step:
-      
-      ${problem}
-      
-      Provide a clear, detailed explanation of each step in the solution process.
-      Format your answer with clear steps and explanations.
-      If there are multiple approaches, show the most straightforward one first.
-      Format all math expressions in LaTeX, and wrap them in \\( ... \\) for inline math or \\[ ... \\] for block math. 
-      Do not use Markdown. Only use plain text and LaTeX delimiters.
-    `
+     You are a helpful math tutor. Please solve the following math problem step by step:
+
+     ${problem}
+
+     Provide a clear, detailed explanation of each step in the solution process.
+     Clearly separate the solution for each part of the problem. Begin each new part with a label such as "Part (i):", "Part (ii):", "Part (a):", "Part (b):", etc. 
+     Place a blank line before the start of each new part's label and another blank line after the label before the solution begins. 
+     For lengthy explanations within a part, break them down into shorter paragraphs to improve readability. 
+     Aim for paragraph breaks roughly every 90 words, or whenever a logical sub-step or idea is completed. Use blank lines to separate these paragraphs.
+     Format all math expressions in LaTeX, and wrap them in \\( ... \\) for inline math or \\[ ... \\] for block math.
+     Do not use any Markdown formatting, including bolding, italics, or code blocks. Only use plain text and LaTeX delimiters.
+`;
 
     const result = await model.generateContent(prompt)
     const response = result.response

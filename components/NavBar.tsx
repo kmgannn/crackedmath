@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, usePathname } from "next/navigation"
-import { Home, Calculator, User, Sparkles } from "lucide-react"
+import { Calculator, User, Sparkles, Newspaper } from "lucide-react"
 import { motion } from "framer-motion"
 import { useSwipeable } from "react-swipeable"
 import { useTheme } from "@/contexts/theme-context"
@@ -12,9 +12,9 @@ export default function NavBar() {
   const { isDarkMode } = useTheme()
 
   const navItems = [
-    { name: "Home", path: "/home", icon: <Home className="h-6 w-6" /> },
     { name: "Solver", path: "/solver", icon: <Calculator className="h-6 w-6" /> },
     { name: "Generator", path: "/generator", icon: <Sparkles className="h-6 w-6" /> },
+    { name: "Cheat Sheet", path: "/cheatsheet", icon: <Newspaper className="h-6 w-6" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-6 w-6" /> },
   ]
 
@@ -46,7 +46,7 @@ export default function NavBar() {
           key={item.name}
           onClick={() => router.push(item.path)}
           className={`flex flex-col items-center p-2 ${
-            pathname === item.path || (item.path === "/home" && pathname === "/")
+            pathname === item.path || (item.path === "/cheatsheet" && pathname === "/")
               ? isDarkMode
                 ? "text-indigo-400"
                 : "text-indigo-600"

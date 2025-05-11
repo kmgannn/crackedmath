@@ -1,177 +1,163 @@
-"use client"
+"use client";
 
-import type React from "react"
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/contexts/theme-context";
+import { solveMathProblem } from "@/lib/gemini-api";
 
-import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { useTheme } from "@/contexts/theme-context"
-import { BrainCircuit, Upload, History, FileText, Type, X, AlertTriangle } from "lucide-react"
-import { solveMathProblem } from "@/lib/gemini-api"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
-import { QuestionCounter } from "@/components/QuestionCounter"
-import { Math } from "@/components/Math"
+import {
+  BrainCircuit,
+  Upload,
+  History,
+  FileText,
+  Type,
+  X,
+  AlertTriangle,
+  AlertCircle,
+} from "lucide-react";
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QuestionCounter } from "@/components/QuestionCounter";
+import { Math } from "@/components/Math";
 
 type Problem = {
-  id: string
-  question: string
-  solution?: string
-  timestamp: Date
-}
+  id: string;
+  question: string;
+  solution?: string;
+  timestamp: Date;
+};
 
 export default function SolverPage() {
-  const router = useRouter()
-  const { isDarkMode } = useTheme()
-  const [activeTab, setActiveTab] = useState<"solve" | "generate">("solve")
-  const [inputMethod, setInputMethod] = useState<"text" | "file">("text")
-  const [problem, setProblem] = useState("")
-  const [file, setFile] = useState<File | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState("")
-  const [extractedText, setExtractedText] = useState("")
-  const [history, setHistory] = useState<Problem[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const { isDarkMode } = useTheme();
+
+  const [activeTab, setActiveTab] = useState<"solve" | "generate">("solve");
+  const [inputMethod, setInputMethod] = useState<"text" | "file">("text");
+  const [problem, setProblem] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState("");
+  const [extractedText, setExtractedText] = useState("");
+  const [history, setHistory] = useState<Problem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSolve = async () => {
-    // Reset previous errors and extracted text
-    setError("")
-    setExtractedText("")
+    setError("");
+    setExtractedText("");
 
-    // Validate input
     if (inputMethod === "text" && !problem.trim()) {
-      setError("Please enter a math problem")
-      return
+      setError("Please enter a math problem");
+      return;
     }
 
     if (inputMethod === "file" && !file) {
-      setError("Please upload an image or PDF file")
-      return
+      setError("Please upload an image or PDF file");
+      return;
     }
 
-    // Validate file size if using file input
     if (inputMethod === "file" && file && file.size > 5 * 1024 * 1024) {
-      setError("File too large. Maximum size is 5MB.")
-      return
+      setError("File too large. Maximum size is 5MB.");
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
 
     try {
-      let result: string
-      let extractedProblem: string = problem
+      let result: string;
+      let extractedProblem: string = problem;
 
       if (inputMethod === "file" && file) {
-        // Handle file upload and OCR
-        const formData = new FormData()
-        formData.append("file", file)
+        const formData = new FormData();
+        formData.append("file", file);
 
-        try {
-          const response = await fetch("/api/ocr-solve", {
-            method: "POST",
-            body: formData,
-          })
+        const response = await fetch("/api/ocr-solve", {
+          method: "POST",
+          body: formData,
+        });
 
-          // Parse response based on content type
-          const contentType = response.headers.get("content-type") || ""
+        const contentType = response.headers.get("content-type") || "";
 
-          if (contentType.includes("application/json")) {
-            const data = await response.json()
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
 
-            // Check if the response contains an error
-            if (!response.ok) {
-              // If we got extracted text despite the error, show it to the user
-              if (data.extractedText) {
-                setExtractedText(data.extractedText)
-                setProblem(data.extractedText)
-                setInputMethod("text")
-                throw new Error(`${data.error} We've added the extracted text to the input field for you to try again.`)
-              }
-              throw new Error(data.error || `Server error: ${response.status}`)
+          if (!response.ok) {
+            if (data.extractedText) {
+              setExtractedText(data.extractedText);
+              setProblem(data.extractedText);
+              setInputMethod("text");
+              throw new Error(
+                `${data.error} We've added the extracted text to the input field for you to try again.`
+              );
             }
-
-            result = data.solution
-            extractedProblem = data.problem
-          } else {
-            // Handle non-JSON responses
-            const errorText = await response.text()
-            throw new Error(`Unexpected response from server: ${errorText.substring(0, 100)}...`)
+            throw new Error(data.error || `Server error: ${response.status}`);
           }
-        } catch (fetchError: any) {
-          console.error("Fetch error:", fetchError)
-          throw new Error(fetchError.message || "OCR processing failed. Please try using text input instead.")
+
+          result = data.solution;
+          extractedProblem = data.problem;
+        } else {
+          const errorText = await response.text();
+          throw new Error(
+            `Unexpected response from server: ${errorText.substring(0, 100)}...`
+          );
         }
       } else {
-        // Handle text input - direct call to Gemini API
-        try {
-          result = await solveMathProblem(problem)
-        } catch (apiError: any) {
-          console.error("API error:", apiError)
-          throw new Error(
-            `AI processing failed: ${apiError.message || "Unable to solve the problem. Please try a different problem."}`,
-          )
-        }
+        result = await solveMathProblem(problem);
       }
 
-      // Create new problem entry and add to history
       const newProblem: Problem = {
         id: Date.now().toString(),
         question: extractedProblem,
         solution: result,
         timestamp: new Date(),
-      }
+      };
 
-      setHistory((prev) => [newProblem, ...prev])
-
-      // Reset form
-      setProblem("")
-      setFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
+      setHistory((prev) => [newProblem, ...prev]);
+      setProblem("");
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      console.error("Error in handleSolve:", err)
-      setError(err instanceof Error ? err.message : "Failed to solve the problem. Please try again.")
+      console.error("Error in handleSolve:", err);
+      setError(err instanceof Error ? err.message : "Failed to solve the problem. Please try again.");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null
+    const selectedFile = e.target.files?.[0] || null;
+    const validTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
 
-    // Validate file type
-    if (selectedFile) {
-      const validTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"]
-      if (!validTypes.includes(selectedFile.type)) {
-        setError("Invalid file type. Please upload a JPG, PNG, or PDF file.")
-        e.target.value = ""
-        return
-      }
-
-      // Clear previous errors when a valid file is selected
-      setError("")
+    if (selectedFile && !validTypes.includes(selectedFile.type)) {
+      setError("Invalid file type. Please upload a JPG, PNG, or PDF file.");
+      e.target.value = "";
+      return;
     }
 
-    setFile(selectedFile)
-  }
+    setError("");
+    setFile(selectedFile);
+  };
 
   const clearFile = () => {
-    setFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-    setError("") // Clear any file-related errors
-  }
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setError("");
+  };
 
   const handleGenerateClick = () => {
-    setActiveTab("generate")
-    router.push("/generator")
-  }
+    setActiveTab("generate");
+    router.push("/generator");
+  };
 
   return (
     <div>
       <QuestionCounter />
+
       <div className={`tab-container ${isDarkMode ? "tab-container-dark" : "tab-container-light"}`}>
         <button
           onClick={() => setActiveTab("solve")}
@@ -181,13 +167,14 @@ export default function SolverPage() {
                 ? "tab-button-active-dark"
                 : "tab-button-active-light"
               : isDarkMode
-                ? "tab-button-inactive-dark"
-                : "tab-button-inactive-light"
+              ? "tab-button-inactive-dark"
+              : "tab-button-inactive-light"
           }`}
         >
           <BrainCircuit className="h-5 w-5" />
           Solve Problem
         </button>
+
         <button
           onClick={handleGenerateClick}
           className={`tab-button ${
@@ -196,8 +183,8 @@ export default function SolverPage() {
                 ? "tab-button-active-dark"
                 : "tab-button-active-light"
               : isDarkMode
-                ? "tab-button-inactive-dark"
-                : "tab-button-inactive-light"
+              ? "tab-button-inactive-dark"
+              : "tab-button-inactive-light"
           }`}
         >
           <svg
@@ -220,11 +207,7 @@ export default function SolverPage() {
 
       <div className={`content-container ${isDarkMode ? "content-container-dark" : "content-container-light"}`}>
         <div className="space-y-4">
-          <Tabs
-            value={inputMethod}
-            onValueChange={(value) => setInputMethod(value as "text" | "file")}
-            className="w-full"
-          >
+          <Tabs value={inputMethod} onValueChange={(v) => setInputMethod(v as "text" | "file")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="text" className="flex items-center gap-2">
                 <Type className="h-4 w-4" />
@@ -249,11 +232,7 @@ export default function SolverPage() {
             <TabsContent value="file">
               <div className="space-y-2">
                 {file ? (
-                  <div
-                    className={`p-3 rounded-lg border flex items-center justify-between ${
-                      isDarkMode ? "border-border bg-secondary" : "border-border bg-secondary"
-                    }`}
-                  >
+                  <div className={`p-3 rounded-lg border flex items-center justify-between ${isDarkMode ? "border-border bg-secondary" : "border-border bg-secondary"}`}>
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-primary" />
                       <span className="text-sm truncate max-w-[200px]">{file.name}</span>
@@ -293,10 +272,7 @@ export default function SolverPage() {
           )}
 
           {extractedText && (
-            <Alert
-              variant="default"
-              className="bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800"
-            >
+            <Alert variant="default" className="bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription className="text-amber-800 dark:text-amber-300">
                 We extracted text from your image but couldn't solve it automatically. Please review the text in the
@@ -311,7 +287,7 @@ export default function SolverPage() {
             className={`submit-button ${isDarkMode ? "submit-button-dark" : "submit-button-light"}`}
           >
             <BrainCircuit className="h-5 w-5" />
-            {isProcessing ? "Solving..." : "Solve with AI"}
+            {isProcessing ? "Solving, please wait..." : "Solve with AI"}
           </button>
         </div>
       </div>
@@ -324,10 +300,7 @@ export default function SolverPage() {
           </h2>
           <div className="space-y-4">
             {history.map((problem) => (
-              <div
-                key={problem.id}
-                className={`history-item ${isDarkMode ? "history-item-dark" : "history-item-light"}`}
-              >
+              <div key={problem.id} className={`history-item ${isDarkMode ? "history-item-dark" : "history-item-light"}`}>
                 <h3 className="font-semibold mb-1">Problem:</h3>
                 <Math>{problem.question}</Math>
                 {problem.solution && (
@@ -343,5 +316,5 @@ export default function SolverPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

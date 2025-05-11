@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import NavBar from "@/components/NavBar"
 import { Calculator } from "lucide-react"
+import ThemeToggle from "@/components/ThemeToggle"
 
 export default function ProtectedLayout({
   children,
@@ -28,7 +29,7 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className={`app-container ${isDarkMode ? "dark app-container-dark" : "app-container-light"}`}>
+    <div className={`min-h-screen ${isDarkMode ? "dark app-container-dark" : "app-container-light"}`}>
       <div className="container mx-auto px-4 py-8 pb-24">
         <div className="max-w-3xl mx-auto">
           <div className="flex justify-between items-center mb-8">
@@ -37,7 +38,8 @@ export default function ProtectedLayout({
               Cracked Math
             </h1>
             <div className="flex items-center gap-4">
-              {user && <span className="text-sm text-muted-foreground">Welcome, {user.name}</span>}
+              {user && <span className="text-sm text-muted-foreground">Welcome, {user.displayName || user.name}</span>}
+              <ThemeToggle />
             </div>
           </div>
 

@@ -1,13 +1,23 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup
+} from "firebase/auth"
 import { auth } from "@/lib/firebase"
 
 type User = {
   uid: string
   email: string | null
   name: string
+  displayName: string | null
+  photoURL: string | null
 }
 
 type AuthContextType = {
@@ -17,6 +27,8 @@ type AuthContextType = {
   logout: () => Promise<void>
   isAuthenticated: boolean
   isLoading: boolean
+  signInWithGoogle: () => Promise<{ success: boolean; error: any }>
+  signInWithFacebook: () => Promise<{ success: boolean; error: any }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -32,7 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          name: firebaseUser.email?.split("@")[0] || "User",
+          name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "User",
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL
         })
       } else {
         setUser(null)
@@ -43,19 +57,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe()
   }, [])
 
-  // Update the login function to better handle Firebase errors
   const login = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password)
       return { success: true, error: null }
     } catch (error: any) {
       console.error("Error logging in:", error)
-
-      // Extract the Firebase error code
       const errorCode = error.code || "unknown-error"
       let errorMessage = "An error occurred during login."
 
-      // Map Firebase error codes to user-friendly messages
       if (
         errorCode === "auth/invalid-credential" ||
         errorCode === "auth/user-not-found" ||
@@ -74,19 +84,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Update the signup function to match the new return format
   const signup = async (email: string, password: string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password)
       return { success: true, error: null }
     } catch (error: any) {
       console.error("Error signing up:", error)
-
-      // Extract the Firebase error code
       const errorCode = error.code || "unknown-error"
       let errorMessage = "An error occurred during signup."
 
-      // Map Firebase error codes to user-friendly messages
       if (errorCode === "auth/email-already-in-use") {
         errorMessage = "This email is already in use. Please try a different email or login instead."
       } else if (errorCode === "auth/invalid-email") {
@@ -109,6 +115,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      return { success: false, error };
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      const provider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error signing in with Facebook:", error);
+      return { success: false, error };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -118,6 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isAuthenticated: !!user,
         isLoading,
+        signInWithGoogle: handleGoogleSignIn,
+        signInWithFacebook: handleFacebookSignIn,
       }}
     >
       {children}
