@@ -1,6 +1,0 @@
-{
-    "files.exclude": {
-        "**/.firebase": true,
-        "**/.next": true
-    }
-}
