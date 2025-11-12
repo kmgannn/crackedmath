@@ -34,3 +34,5 @@ firebase.json
 google-credentials.json
 
 /myownmodules/
+"google-credentials.json" 
+"my own modules/google.json" 
